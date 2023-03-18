@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Penandatangan;
 use App\Models\Training;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -32,7 +33,8 @@ class TrainingController extends Controller
     public function create()
     {
         $categories = Category::latest()->get();
-        return view('auth.training.create', compact('categories'));
+        $penandatangans = Penandatangan::latest()->get();
+        return view('auth.training.create', compact('categories', 'penandatangans'));
     }
 
     /**
@@ -51,10 +53,21 @@ class TrainingController extends Controller
                 'title' => 'required',
                 'year' => 'required',
                 'category' => 'required',
-                'datepicker_awal' => 'required',
-                'datepicker_akhir' => 'required',
+                'hour' => 'required',
+                'tanggal_pelaksanaan' => 'required',
+                'tempat' => 'required',
+                'penandatangan' => 'required'
             ],
-            [],
+            [
+                'code.required' => 'Code wajib diisi.',
+                'title.required' => 'Nama Pelatihan wajib diisi.',
+                'year.required' => 'Tahun pelatihan wajib isi',
+                'category.required' => 'Kategori Pelatihan wajib diisi.',
+                'hour.required' => 'Durasi Pelatihan wajib diisi.',
+                'tanggal_pelaksanaan.required' => 'Tanggal pelaksanaan wajib diisi.',
+                'tempat.required' => 'Tempat Pelatihan wajib diisi',
+                'Penandatangan.required' => 'Penandatangan Pelatihan wajib diisi',
+            ],
         );
 
         // kondisi jika validasi gagal dilewati.
@@ -71,9 +84,11 @@ class TrainingController extends Controller
                 'slug' => Str::slug($request->title . '-tahun-' . $request->year, '-'),
                 'year' => $request->year,
                 'hour' => $request->hour ?? 0,
-                'tanggal_pelaksanaan' => Carbon::parse($request->datepicker_awal)->translatedFormat('d F') . ' s.d. ' . Carbon::parse($request->datepicker_akhir)->translatedFormat('d F Y'),
+                'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
                 'tempat' => $request->tempat,
                 'category_id' => $request->category,
+                'tanggal_terbit' => $request->tanggal_terbit ?? 'Date Unknowed',
+                'penandatangan_id' => $request->penandatangan,
             ]);
             return redirect()->route('dashboard.training.index')->with('success', 'Pelatihan has ben added');
         } catch (\Throwable $th) {
@@ -105,7 +120,8 @@ class TrainingController extends Controller
     {
         $training = Training::where('slug', $slug)->first();
         $categories = Category::latest()->get();
-        return view('auth.training.edit', compact('training', 'categories'));
+        $penandatangans = Penandatangan::latest()->get();
+        return view('auth.training.edit', compact('training', 'categories', 'penandatangans'));
     }
 
     /**
@@ -125,8 +141,21 @@ class TrainingController extends Controller
                 'title' => 'required',
                 'year' => 'required',
                 'category' => 'required',
+                'hour' => 'required',
+                'tanggal_pelaksanaan' => 'required',
+                'tempat' => 'required',
+                'penandatangan' => 'required'
             ],
-            [],
+            [
+                'code.required' => 'Code wajib diisi.',
+                'title.required' => 'Nama Pelatihan wajib diisi.',
+                'year.required' => 'Tahun pelatihan wajib isi',
+                'category.required' => 'Kategori Pelatihan wajib diisi.',
+                'hour.required' => 'Durasi Pelatihan wajib diisi.',
+                'tanggal_pelaksanaan.required' => 'Tanggal pelaksanaan wajib diisi.',
+                'tempat.required' => 'Tempat Pelatihan wajib diisi',
+                'Penandatangan.required' => 'Penandatangan Pelatihan wajib diisi',
+            ],
         );
 
         // kondisi jika validasi gagal dilewati.
@@ -134,18 +163,39 @@ class TrainingController extends Controller
             return redirect()->back()->withInput($request->all())->withErrors($validator);
         }
 
+        // TES
+        $training = Training::where('slug', $slug)->first();
+
+        $training->update([
+            'code' => $request->code,
+            'title' => $request->title,
+            'slug' => Str::slug($request->title . '-tahun-' . $request->year, '-'),
+            'year' => $request->year,
+            'hour' => $request->hour ?? 0,
+            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+            'tempat' => $request->tempat,
+            'category_id' => $request->category,
+            'tanggal_terbit' => $request->tanggal_terbit ?? 'Date Unknowed',
+            'penandatangan_id' => $request->penandatangan,
+        ]);
+        return redirect()->route('dashboard.training.index')->with('success', 'Pelatihan has ben updated');
+        // TES
+
         DB::beginTransaction();
         try {
             $training = Training::where('slug', $slug)->first();
+
             $training->update([
                 'code' => $request->code,
                 'title' => $request->title,
                 'slug' => Str::slug($request->title . '-tahun-' . $request->year, '-'),
                 'year' => $request->year,
                 'hour' => $request->hour ?? 0,
-                'tanggal_pelaksanaan' => Carbon::parse($request->datepicker_awal)->translatedFormat('d F') . ' s.d. ' . Carbon::parse($request->datepicker_akhir)->translatedFormat('d F Y') ?? $request->old_tanggal_pelaksanaan,
+                'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
                 'tempat' => $request->tempat,
                 'category_id' => $request->category,
+                'tanggal_terbit' => $request->tanggal_terbit ?? 'Date Unknowed',
+                'penandatangan' => $request->penandatangan,
             ]);
             return redirect()->route('dashboard.training.index')->with('success', 'Pelatihan has ben updated');
         } catch (\Throwable $th) {
