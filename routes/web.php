@@ -80,22 +80,6 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
     Route::patch('/peserta/{slug}/update', [ParticipantController::class, 'update'])->name('dashboard.participant.update');
     Route::delete('/peserta/{slug}/delete', [ParticipantController::class, 'destroy'])->name('dashboard.participant.delete');
 
-    // Generate Certificate
-    Route::get('/peserta/{slug}/show', [ParticipantController::class, 'show'])->name('dashboard.participant.show');
-
-    // Certificates / Sertifikasi
-    Route::get('/sertifikat', [CertificateController::class, 'index'])->name('dashboard.certificate.index');
-    Route::get('/sertifikat/create', [CertificateController::class, 'create'])->name('dashboard.certificate.create');
-    Route::post('/sertifikat/store', [CertificateController::class, 'store'])->name('dashboard.certificate.store');
-    Route::get('/sertifikat/{code}/edit', [CertificateController::class, 'edit'])->name('dashboard.certificate.edit');
-    Route::patch('/sertifikat/{code}/update', [CertificateController::class, 'update'])->name('dashboard.certificate.update');
-    Route::delete('/sertifikat/{code}/delete', [CertificateController::class, 'destroy'])->name('dashboard.certificate.delete');
-
-
-    // Cetak
-    Route::get('/cetak/pelatihan/{code}', [CertificateController::class, 'cetakPelatihan'])->name('dashboard.certificate.cetak.pelatihan');
-    Route::get('/cetak/bimtek/{code}', [CertificateController::class, 'cetakBimtek'])->name('dashboard.certificate.cetak.bimtek');
-
     // Penandatangan
     Route::get('/penandatangan', [PenandatanganController::class, 'index'])->name('dashboard.penandatangan.index');
     Route::get('/penandatangan/create', [PenandatanganController::class, 'create'])->name('dashboard.penandatangan.create');

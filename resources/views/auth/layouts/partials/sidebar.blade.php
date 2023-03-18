@@ -68,12 +68,6 @@
                         <p>Pelatihan</p>
                     </a>
                 </li>
-                <li class="nav-item {{ request()->segment(2) == 'sertifikat' ? 'active' : '' }}">
-                    <a href="{{ route('dashboard.certificate.index') }}">
-                        <i class="fas fa-certificate"></i>
-                        <p>Sertifikat</p>
-                    </a>
-                </li>
             </ul>
         </div>
     </div>
