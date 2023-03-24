@@ -44,7 +44,6 @@
                     </div>
                     <div class="form-group">
                         <label for="password" class="placeholder"><b>Password</b></label>
-                        <a href="#" class="link float-right">Forget Password ?</a>
                         <div class="position-relative">
                             <input id="password" name="password" type="password" class="form-control" required>
                             <div class="show-password">

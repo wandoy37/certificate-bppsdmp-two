@@ -11,7 +11,7 @@
                 <ul class="breadcrumbs">
                     <li class="nav-home">
                         <a href="{{ route('dashboard.index') }}">
-                            {{-- <i class="flaticon-home"></i> --}}
+                            <i class="fas fa-book-reader"></i>
                         </a>
                     </li>
                 </ul>

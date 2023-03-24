@@ -35,7 +35,8 @@
                         <i class="fas fa-undo"></i>
                         Kembali
                     </a>
-                    <a href="{{ route('dashboard.training.index') }}" class="btn btn-info btn-round ml-2">
+                    <a href="{{ route('dashboard.participant.export.peserta', $training->slug) }}"
+                        class="btn btn-info btn-round ml-2" target="_blank">
                         <i class="fas fa-file-download"></i>
                         Export
                     </a>

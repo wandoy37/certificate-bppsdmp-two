@@ -32,7 +32,7 @@ class ParticipantController extends Controller
     {
         $training = Training::where('slug', $slug)->first();
         $roles = Role::latest()->get();
-        $participants = Participant::all()->count();
+        $participants = Participant::where('registred_date', date('Y'))->get()->count();
         $participants++;
         return view('auth.participant.create', compact('roles', 'training', 'participants'));
     }
@@ -82,6 +82,7 @@ class ParticipantController extends Controller
                 'instansi' => $request->instansi,
                 'role_id' => $request->role,
                 'training_id' => $training->id,
+                'registred_date' => date('Y'),
             ]);
             return redirect()->route('dashboard.training.index')->with('success', 'Peserta ' . $request->name . ' berhasil di tambahkan pada pelatihan.');
         } catch (\Throwable $th) {
@@ -195,5 +196,11 @@ class ParticipantController extends Controller
         } finally {
             DB::commit();
         }
+    }
+
+    public function export($slug)
+    {
+        $training = Training::where('slug', $slug)->first();
+        return view('auth.participant.export', compact('training'));
     }
 }

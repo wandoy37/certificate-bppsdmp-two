@@ -86,6 +86,9 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
     // View Participant with trainings
     Route::get('/pelatihan/peserta/{slug}/view-peserta', [ParticipantController::class, 'show'])->name('dashboard.participant.show.peserta');
 
+    // Export Participants with trainings
+    Route::get('/pelatihan/peserta/{slug}/export', [ParticipantController::class, 'export'])->name('dashboard.participant.export.peserta');
+
     // Penandatangan
     Route::get('/penandatangan', [PenandatanganController::class, 'index'])->name('dashboard.penandatangan.index');
     Route::get('/penandatangan/create', [PenandatanganController::class, 'create'])->name('dashboard.penandatangan.create');
