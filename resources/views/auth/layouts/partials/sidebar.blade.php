@@ -21,18 +21,6 @@
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
                     </span>
-                    <h4 class="text-section">MENU MASTER</h4>
-                </li>
-                <li class="nav-item {{ request()->segment(2) == 'pengguna' ? 'active' : '' }}">
-                    <a href="{{ route('dashboard.user.index') }}">
-                        <i class="fas fa-users-cog"></i>
-                        <p>Pengguna</p>
-                    </a>
-                </li>
-                <li class="nav-section">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
                     <h4 class="text-section">MENU NAVIGATIONS</h4>
                 </li>
                 <li class="nav-item {{ request()->segment(2) == 'dashboard' ? 'active' : '' }}">
@@ -41,16 +29,10 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item {{ request()->segment(2) == 'peserta' ? 'active' : '' }}">
-                    <a href="{{ route('dashboard.participant.index') }}">
-                        <i class="fas fa-users"></i>
-                        <p>Peserta</p>
-                    </a>
-                </li>
-                <li class="nav-item {{ request()->segment(2) == 'penandatangan' ? 'active' : '' }}">
-                    <a href="{{ route('dashboard.penandatangan.index') }}">
-                        <i class="fas fa-user-check"></i>
-                        <p>Penandatangan</p>
+                <li class="nav-item {{ request()->segment(2) == 'pengguna' ? 'active' : '' }}">
+                    <a href="{{ route('dashboard.user.index') }}">
+                        <i class="fas fa-users-cog"></i>
+                        <p>Pengguna</p>
                     </a>
                 </li>
                 <li class="nav-section">
@@ -60,6 +42,12 @@
                     <a href="{{ route('dashboard.category.index') }}">
                         <i class="fas fa-box"></i>
                         <p>Category</p>
+                    </a>
+                </li>
+                <li class="nav-item {{ request()->segment(2) == 'penandatangan' ? 'active' : '' }}">
+                    <a href="{{ route('dashboard.penandatangan.index') }}">
+                        <i class="fas fa-user-check"></i>
+                        <p>Penandatangan</p>
                     </a>
                 </li>
                 <li class="nav-item {{ request()->segment(2) == 'pelatihan' ? 'active' : '' }}">

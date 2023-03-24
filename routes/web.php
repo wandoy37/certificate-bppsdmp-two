@@ -72,13 +72,19 @@ Route::prefix('auth')->middleware(['auth'])->group(function () {
     Route::patch('/pelatihan/{slug}/update', [TrainingController::class, 'update'])->name('dashboard.training.update');
     Route::delete('/pelatihan/{slug}/delete', [TrainingController::class, 'destroy'])->name('dashboard.training.delete');
 
-    // Participants / Peserta
-    Route::get('/peserta', [ParticipantController::class, 'index'])->name('dashboard.participant.index');
-    Route::get('/peserta/create', [ParticipantController::class, 'create'])->name('dashboard.participant.create');
-    Route::post('/peserta/store', [ParticipantController::class, 'store'])->name('dashboard.participant.store');
-    Route::get('/peserta/{slug}/edit', [ParticipantController::class, 'edit'])->name('dashboard.participant.edit');
-    Route::patch('/peserta/{slug}/update', [ParticipantController::class, 'update'])->name('dashboard.participant.update');
-    Route::delete('/peserta/{slug}/delete', [ParticipantController::class, 'destroy'])->name('dashboard.participant.delete');
+    // Added Participants
+    Route::get('/pelatihan/{slug}/tambah-peserta', [ParticipantController::class, 'create'])->name('dashboard.training.create.peserta');
+    Route::post('/pelatihan/{slug}/tambah-peserta/store', [ParticipantController::class, 'store'])->name('dashboard.training.store.peserta');
+
+    // Edit/Updated Participants
+    Route::get('/pelatihan/peserta/{code}/edit', [ParticipantController::class, 'edit'])->name('dashboard.participant.edit.peserta');
+    Route::patch('/pelatihan/peserta/{code}/update', [ParticipantController::class, 'update'])->name('dashboard.participant.update.peserta');
+
+    // Delete Partticipant
+    Route::delete('/pelatihan/peserta/{code}/delete', [ParticipantController::class, 'destroy'])->name('dashboard.participant.delete.peserta');
+
+    // View Participant with trainings
+    Route::get('/pelatihan/peserta/{slug}/view-peserta', [ParticipantController::class, 'show'])->name('dashboard.participant.show.peserta');
 
     // Penandatangan
     Route::get('/penandatangan', [PenandatanganController::class, 'index'])->name('dashboard.penandatangan.index');

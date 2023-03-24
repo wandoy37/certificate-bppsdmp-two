@@ -14,24 +14,14 @@
                             {{-- <i class="flaticon-home"></i> --}}
                         </a>
                     </li>
-                    {{-- <li class="separator">
-                        <i class="flaticon-right-arrow"></i>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#">Pages</a>
-                    </li>
-                    <li class="separator">
-                        <i class="flaticon-right-arrow"></i>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#">Starter Page</a>
-                    </li> --}}
                 </ul>
             </div>
-            {{-- <div class="page-category">Inner page content goes here</div> --}}
 
+
+            {{-- Notify Success --}}
+            <div id="flashSuccess" data-flash="{{ session('success') }}"></div>
             {{-- Notify --}}
-            <div id="flash" data-flash="{{ session('success') }}"></div>
+            <div id="flashFails" data-flash="{{ session('fails') }}"></div>
 
             <div class="row">
                 <div class="col-lg-12 py-3 mb-4">
@@ -46,36 +36,50 @@
                             <table class="table table-hover table-bordered">
                                 <thead>
                                     <tr class="text-center">
+                                        <th scope="col" width="5%">Nomor Pelatihan</th>
                                         <th scope="col">Nama Pelatihan</th>
                                         <th scope="col">Kategori Pelatihan</th>
                                         <th scope="col">Tahun</th>
+                                        <th scope="col" width="5%">Total Peserta</th>
                                         <th scope="col">QR Code</th>
-                                        <th scope="col" width="10%">Actions</th>
+                                        <th scope="col" width="15%">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($trainings as $training)
                                         <tr style="height: 150px; vertical-align: center;">
+                                            <td>{{ $training->code }}</td>
                                             <td>{{ $training->title }}</td>
                                             <td class="text-uppercase text-center">{{ $training->category->title }}</td>
                                             <td class="text-center">{{ $training->year }}</td>
+                                            <td class="text-center">
+                                                {{ $training->participants->count() }}
+                                            </td>
                                             <td class="text-center">
                                                 {!! QrCode::size(100)->generate(route('show.training', $training->slug)) !!}
                                                 {{-- {{ route('show.training', $training->slug) }} --}}
                                             </td>
                                             <td class="text-center">
-                                                <div class="form-inline ml-4">
+                                                <form id="form-delete-{{ $training->id }}"
+                                                    action="{{ route('dashboard.training.delete', $training->slug) }}"
+                                                    method="post">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                                <div class="btn-group" role="group" aria-label="Basic example">
+                                                    <a href="{{ route('dashboard.participant.show.peserta', $training->slug) }}"
+                                                        class="btn btn-primary">
+                                                        <i class="fas fa-list-alt"></i>
+                                                    </a>
+                                                    <a href="{{ route('dashboard.training.create.peserta', $training->slug) }}"
+                                                        class="btn btn-info">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </a>
                                                     <a href="{{ route('dashboard.training.edit', $training->slug) }}"
-                                                        class="text-warning">
+                                                        class="btn btn-warning">
                                                         <i class="fas fa-pen"></i>
                                                     </a>
-                                                    <form id="form-delete-{{ $training->id }}"
-                                                        action="{{ route('dashboard.training.delete', $training->slug) }}"
-                                                        method="post">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
-                                                    <button type="button" class="btn btn-link text-danger"
+                                                    <button type="button" class="btn btn-danger"
                                                         onclick="btnDelete( {{ $training->id }} )">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -98,16 +102,31 @@
 @push('scripts')
     {{-- Notify --}}
     <script>
-        var flash = $('#flash').data('flash');
+        var flash = $('#flashSuccess').data('flash');
         if (flash) {
             $.notify({
                 // options
                 icon: 'fas fa-check',
-                title: 'Success',
+                title: 'Berhasil',
                 message: '{{ session('success') }}',
             }, {
                 // settings
-                type: 'success'
+                type: 'success',
+            });
+        }
+    </script>
+
+    <script>
+        var flash = $('#flashFails').data('flash');
+        if (flash) {
+            $.notify({
+                // options
+                icon: 'fas fa-ban',
+                title: 'Gagal',
+                message: '{{ session('fails') }}',
+            }, {
+                // settings
+                type: 'danger',
             });
         }
     </script>

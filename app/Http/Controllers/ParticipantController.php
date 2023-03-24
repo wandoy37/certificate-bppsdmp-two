@@ -20,26 +20,7 @@ class ParticipantController extends Controller
      */
     public function index()
     {
-        $participants = DB::table('participants')
-            ->join('roles', 'roles.id', '=', 'participants.role_id')
-            ->select([
-                'participants.id',
-                'participants.name',
-                'participants.slug',
-                'participants.nik',
-                'participants.nip',
-                'roles.title AS role',
-            ]);
-        if (request('search')) {
-            $participants->where('name', 'LIKE', '%' . request('search') . '%');
-        }
-
-        // Output filter search
-        $search = request('search') ?? '';
-
-        $participants = $participants->orderBy('id', 'DESC')->paginate(10);
-
-        return view('auth.participant.index', compact('participants', 'search'));
+        //
     }
 
     /**
@@ -47,11 +28,13 @@ class ParticipantController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($slug)
     {
+        $training = Training::where('slug', $slug)->first();
         $roles = Role::latest()->get();
-        $trainings = Training::latest()->get();
-        return view('auth.participant.create', compact('roles', 'trainings'));
+        $participants = Participant::all()->count();
+        $participants++;
+        return view('auth.participant.create', compact('roles', 'training', 'participants'));
     }
 
     /**
@@ -60,16 +43,22 @@ class ParticipantController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $slug)
     {
         // Validator
         $validator = Validator::make(
             $request->all(),
             [
+                'code' => 'required|unique:participants',
                 'name' => 'required',
                 'role' => 'required',
             ],
-            [],
+            [
+                'code.required' => 'Kode Peserta Wajib Di Isi.',
+                'code.unique' => 'Kode Peserta Telah Di Gunakan.',
+                'name.required' => 'Nama Peserta Wajib Di Isi.',
+                'role.required' => 'Role Peserta Wajib Di Isi.',
+            ],
         );
 
         // kondisi jika validasi gagal dilewati.
@@ -79,24 +68,25 @@ class ParticipantController extends Controller
 
         DB::beginTransaction();
         try {
-            $data = [
+            // Get Training
+            $training = Training::where('slug', $slug)->first();
+            // Store data
+            Participant::create([
+                'code' => $request->code,
                 'name' => $request->name,
-                'slug' => Str::slug($request->name, '-') . '-' . date('Ymd'),
-                'nip' => $request->nip ?? '-',
-                'nik' => $request->nik ?? '-',
-                'birth' => $request->kota . ', ' . Carbon::parse($request->date)->translatedFormat('d F Y') ?? '-',
-                'pangkat_golongan' => $request->pangkat_golongan ?? '-',
-                'jabatan' => $request->jabatan ?? '-',
-                'instansi' => $request->instansi ?? '-',
-                'email' => $request->email ?? '-',
+                'slug' => Str::slug($request->name, '-') . '-' . $request->code,
+                'nip' => $request->nip,
+                'birth' => $request->birth,
+                'pangkat_golongan' => $request->pangkat_golongan,
+                'jabatan' => $request->jabatan,
+                'instansi' => $request->instansi,
                 'role_id' => $request->role,
-            ];
-
-            Participant::create($data);
-            return redirect()->route('dashboard.participant.index')->with('success', 'Peserta berhasil ditambahkan');
+                'training_id' => $training->id,
+            ]);
+            return redirect()->route('dashboard.training.index')->with('success', 'Peserta ' . $request->name . ' berhasil di tambahkan pada pelatihan.');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('dashboard.participant.index')->with('fails', 'Peserta gagal di tambahkan');
+            return redirect()->route('dashboard.training.index')->with('fails', 'Peserta ' . $request->name . ' gagal di tambahkan pada pelatihan.');
         } finally {
             DB::commit();
         }
@@ -110,8 +100,9 @@ class ParticipantController extends Controller
      */
     public function show($slug)
     {
-        $peserta = Participant::where('slug', $slug)->first();
-        return view('auth.participant.print', compact('peserta'));
+        $training = Training::where('slug', $slug)->first();
+        $participants = Participant::where('training_id', $training->id)->get();
+        return view('auth.participant.show', compact('training', 'participants'));
     }
 
     /**
@@ -120,12 +111,11 @@ class ParticipantController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($slug)
+    public function edit($code)
     {
-        $participant = Participant::where('slug', $slug)->first();
+        $participant = Participant::where('code', $code)->first();
         $roles = Role::latest()->get();
-        $trainings = Training::latest()->get();
-        return view('auth.participant.edit', compact('participant', 'roles', 'trainings'));
+        return view('auth.participant.edit', compact('participant', 'roles'));
     }
 
     /**
@@ -135,16 +125,25 @@ class ParticipantController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $slug)
+    public function update(Request $request, $code)
     {
+        // Get participant
+        $participant = Participant::where('code', $code)->first();
+
         // Validator
         $validator = Validator::make(
             $request->all(),
             [
+                'code' => 'required|unique:participants,code,' . $participant->id,
                 'name' => 'required',
                 'role' => 'required',
             ],
-            [],
+            [
+                'code.required' => 'Kode Peserta Wajib Di Isi.',
+                'code.unique' => 'Kode Peserta Telah Di Gunakan.',
+                'name.required' => 'Nama Peserta Wajib Di Isi.',
+                'role.required' => 'Role Peserta Wajib Di Isi.',
+            ],
         );
 
         // kondisi jika validasi gagal dilewati.
@@ -154,24 +153,23 @@ class ParticipantController extends Controller
 
         DB::beginTransaction();
         try {
-            // Get Participant
-            $participant = Participant::where('slug', $slug)->first();
+            // Store data
             $participant->update([
+                'code' => $request->code,
                 'name' => $request->name,
-                'slug' => Str::slug($request->name, '-') . '-' . date('Ymd'),
-                'nip' => $request->nip ?? '-',
-                'nik' => $request->nik ?? '-',
-                'birth' => $request->kota . ', ' . Carbon::parse($request->date)->translatedFormat('d F Y') ?? $participant->birth,
-                'pangkat_golongan' => $request->pangkat_golongan ?? '-',
-                'jabatan' => $request->jabatan ?? '-',
-                'instansi' => $request->instansi ?? '-',
-                'email' => $request->email ?? '-',
-                'role_id' => $request->role ?? '-',
+                'slug' => Str::slug($request->name, '-') . '-' . $request->code,
+                'nip' => $request->nip,
+                'birth' => $request->birth,
+                'pangkat_golongan' => $request->pangkat_golongan,
+                'jabatan' => $request->jabatan,
+                'instansi' => $request->instansi,
+                'role_id' => $request->role,
+                'training_id' => $participant->training_id,
             ]);
-            return redirect()->route('dashboard.participant.index')->with('success', 'Peserta telah di update');
+            return redirect()->route('dashboard.participant.show.peserta', $participant->training->slug)->with('success', 'Peserta ' . $request->name . ' berhasil di update.');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('dashboard.participant.index')->with('fails', 'Peserta gagal di update');
+            return redirect()->back()->with('fails', 'Peserta ' . $request->name . ' gagal di update.');
         } finally {
             DB::commit();
         }
@@ -183,17 +181,17 @@ class ParticipantController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($slug)
+    public function destroy($code)
     {
         DB::beginTransaction();
         try {
-            $participant = Participant::where('slug', $slug)->first();
+            $participant = Participant::where('code', $code)->first();
 
             $participant->delete($participant);
-            return redirect()->route('dashboard.participant.index')->with('success', 'Peserta telah di hapus');
+            return redirect()->route('dashboard.participant.show.peserta', $participant->training->slug)->with('success', 'Peserta ' . $participant->name . ' telah dihapus.');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('dashboard.participant.index')->with('fail', 'Peserta gagal di hapus');
+            return redirect()->route('dashboard.participant.show.peserta', $participant->training->slug)->with('fails', 'Peserta ' . $participant->name . ' gagal dihapus.');
         } finally {
             DB::commit();
         }
